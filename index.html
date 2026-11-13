@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PHANTOM | Direct Bypass Edition</title>
+    <style>
+        :root {
+            --bg-main: #000000;
+            --card-bg: #121212;
+            --accent-red: #ff1e4d;
+            --accent-glow: rgba(255, 30, 77, 0.4);
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; user-select: none; -webkit-user-select: none; }
+        body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; padding-bottom: 80px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+
+        #floating-dock {
+            position: fixed; top: 12px; right: 12px; z-index: 99999;
+            background: rgba(20, 20, 20, 0.95); border: 1px solid #fff;
+            border-radius: 20px; padding: 6px 14px; display: flex; align-items: center; gap: 6px;
+            cursor: pointer; box-shadow: 0 0 12px rgba(255,255,255,0.3);
+        }
+        #floating-dock span { font-size: 0.7rem; font-weight: bold; color: #fff; }
+
+        .container { max-width: 440px; margin: 0 auto; padding: 12px; }
+        .view-pane { display: none; }
+        .view-pane.active { display: block; }
+
+        .x-banner {
+            background: linear-gradient(135deg, #181818 0%, #050505 100%);
+            border: 1px solid var(--border-color); border-radius: 14px; padding: 14px;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 14px;
+        }
+        .banner-logo { width: 50px; height: 70px; background: #000; border: 1px solid #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #fff; font-weight: 900; }
+        .banner-info h2 { font-size: 1rem; font-weight: 900; color: #fff; letter-spacing: 1px; }
+        .banner-info p { font-size: 0.68rem; color: var(--text-muted); margin-top: 3px; }
+
+        .feature-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 14px; margin-bottom: 12px; position: relative; z-index: 2;
+        }
+        .feature-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .feature-title { font-size: 0.85rem; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .edition-badge { background: rgba(255, 255, 255, 0.15); color: #fff; font-size: 0.6rem; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
+        
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #222; transition: .3s; border-radius: 24px; border: 1px solid rgba(255,255,255,0.2); }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: #666; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.4); }
+        input:checked + .slider:before { transform: translateX(20px); background-color: #000; }
+
+        .key-section-box {
+            background: #111; border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        }
+        .key-input-field {
+            background: #080808; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
+            padding: 8px 10px; color: #fff; font-family: monospace; font-size: 0.75rem; width: 100%; outline: none; user-select: text; -webkit-user-select: text;
+        }
+
+        /* กล่องซับสคริปชันแบบกดเลือกก๊อปปี้เองได้ชัวร์ 100% (แก้ปัญหาปุ่มก๊อปปี้ไม่ติด) */
+        .copy-box-wrapper {
+            background: #080808; border: 1.5px solid var(--accent-red); border-radius: 10px; padding: 10px; margin-bottom: 12px;
+            box-shadow: 0 0 12px rgba(255, 30, 77, 0.2); text-align: center;
+        }
+        .copy-box-title { font-size: 0.75rem; font-weight: bold; color: #fff; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .copy-textarea {
+            width: 100%; height: 50px; background: #000; color: #00ff88; border: 1px solid #333; border-radius: 6px;
+            padding: 6px; font-family: monospace; font-size: 0.65rem; outline: none; resize: none; text-align: center;
+            user-select: text; -webkit-user-select: text;
+        }
+
+        .sub-banner-btn {
+            background: linear-gradient(135deg, #ff1e4d 0%, #b30024 100%);
+            border: none; border-radius: 10px; padding: 12px; width: 100%; text-align: center;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(255, 30, 77, 0.4); margin-bottom: 12px;
+            font-size: 0.85rem; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .sub-banner-btn:active { transform: scale(0.98); }
+
+        /* UI ตามต้นฉบับในภาพ */
+        .hitbox-exact-wrapper { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; gap: 8px; }
+        
+        .char-silhouette-box {
+            width: 110px; height: 175px; background: #080808; border: 1px solid var(--border-color);
+            border-radius: 10px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        .phantom-svg-body { width: 75px; height: 155px; pointer-events: none; }
+
+        .phantom-target-box {
+            position: absolute; width: 22px; height: 22px; left: 44px; top: 15px;
+            background: repeating-linear-gradient(45deg, rgba(255,30,77,0.5), rgba(255,30,77,0.5) 3px, rgba(10,10,10,0.7) 3px, rgba(10,10,10,0.7) 6px);
+            border: 1.5px solid var(--accent-red); box-shadow: 0 0 12px var(--accent-glow);
+            display: flex; align-items: center; justify-content: center; pointer-events: none;
+        }
+        .phantom-target-box::after { content: ''; width: 4px; height: 4px; background: #ffffff; border-radius: 50%; box-shadow: 0 0 4px #fff; }
+
+        .slider-center-exact { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 175px; position: relative; z-index: 10; }
+        
+        .touch-track-area {
+            width: 36px; height: 150px; background: rgba(255,255,255,0.03); border-radius: 18px;
+            position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer; touch-action: none;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .touch-track-line { width: 4px; height: 130px; background: #222; border-radius: 2px; position: relative; }
+        .touch-track-fill { position: absolute; bottom: 0; width: 100%; height: 100%; background: var(--accent-red); border-radius: 2px; }
+        .touch-thumb-knob {
+            position: absolute; left: 50%; top: 0%; transform: translate(-50%, -50%);
+            width: 22px; height: 22px; background: var(--accent-red); border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-red); border: 2px solid #fff; pointer-events: none;
+        }
+
+        .hitbox-labels-side { width: 85px; font-size: 0.7rem; color: var(--text-muted); display: flex; flex-direction: column; justify-content: space-between; height: 165px; }
+        .hitbox-labels-side div { display: flex; justify-content: space-between; align-items: center; }
+        .hitbox-labels-side div.active { color: #fff; font-weight: bold; text-shadow: 0 0 6px #fff; }
+        .hitbox-big-percent-exact { font-size: 2.2rem; font-weight: 900; color: var(--accent-red); text-shadow: 0 0 12px var(--accent-glow); text-align: right; }
+
+        .radar-box {
+            width: 100%; height: 160px; background: #080808; border: 1px solid var(--border-color);
+            border-radius: 10px; position: relative; overflow: hidden; margin-top: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .radar-grid-line {
+            position: absolute; width: 100%; height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .player-center { position: absolute; width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 8px #fff; }
+        .enemy-dot {
+            position: absolute; width: 7px; height: 7px; background: var(--accent-red); border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-red);
+        }
+        .enemy-tag { position: absolute; font-size: 0.55rem; color: var(--accent-red); font-weight: bold; transform: translate(10px, -4px); white-space: nowrap; }
+
+        .btn-custom { width: 100%; background: #fff; border: none; border-radius: 8px; padding: 12px; font-weight: bold; font-size: 0.8rem; color: #000; cursor: pointer; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        
+        body.mini-float-active { background: transparent !important; }
+        body.mini-float-active .container { max-width: 100% !important; padding: 2px; }
+        body.mini-float-active .x-banner, body.mini-float-active .bottom-nav { display: none !important; }
+        body.mini-float-active .feature-card { background: rgba(15, 15, 15, 0.96); border: 1px solid #fff; }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(15, 15, 15, 0.98); border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-around; padding: 8px 0; z-index: 1000;
+        }
+        .nav-item {
+            background: none; border: none; color: var(--text-muted); font-size: 0.65rem; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer;
+        }
+        .nav-item.active { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
+        .nav-item svg { width: 18px; height: 18px; fill: currentColor; }
+    </style>
+</head>
+<body>
+
+    <div id="floating-dock" onclick="toggleFloatMode()">
+        <span>⚡ X HUB</span>
+    </div>
+
+    <div class="container">
+        <div class="x-banner">
+            <div class="banner-logo">X HUB</div>
+            <div class="banner-info">
+                <h2>PHANTOM PANEL</h2>
+                <p>Status: <span style="color: #00ff88; font-weight: bold;">🟢 Secure Direct Active</span></p>
+            </div>
+        </div>
+
+        <div id="pane-home" class="view-pane active">
+            
+            <div class="key-section-box">
+                <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: bold; white-space: nowrap;">คีย์ของคุณ</div>
+                <input type="text" id="user-key-input" class="key-input-field" value="pldk-9ef1-fdbd" oninput="updateSubLink()">
+            </div>
+
+            <!-- กล่องก๊อปปี้ลิงก์แบบการันตี 100% (แตะค้างแล้วก๊อปปี้ได้เลย) -->
+            <div class="copy-box-wrapper">
+                <div class="copy-box-title">
+                    <span>📋 ลิงก์ท่อตรง (แตะเพื่อเลือกและก๊อปปี้)</span>
+                    <span style="font-size: 0.6rem; color: #00ff88;">Active</span>
+                </div>
+                <textarea id="sub-link-textarea" class="copy-textarea" readonly onclick="this.select(); document.execCommand('copy'); alert('คัดลอกลิงก์สำเร็จ!');"></textarea>
+            </div>
+
+            <!-- ปุ่มเปิดแอป Happ -->
+            <button class="sub-banner-btn" onclick="openHappApp()">
+                <span>🚀 เปิดแอป Happ (กดปุ่ม Clipboard ด้านล่างซ้าย)</span>
+            </button>
+
+            <!-- ESP RADAR -->
+            <div class="feature-card">
+                <div class="feature-header">
+                    <span class="feature-title">🎯 ESP RADAR <span class="edition-badge">LIVE</span></span>
+                    <label class="switch"><input type="checkbox" checked onchange="toggleRadar(this.checked)"><span class="slider"></span></label>
+                </div>
+                <div style="font-size: 0.68rem; color: var(--text-muted); margin-bottom: 4px;">แสดงพิกัดศัตรูแบบ Real-Time:</div>
+                
+                <div class="radar-box">
+                    <div class="radar-grid-line"></div>
+                    <div class="player-center"></div>
+                    <div class="enemy-dot" style="top: 30px; left: 120px;"><div class="enemy-tag">ENEMY [34m]</div></div>
+                    <div class="enemy-dot" style="top: 100px; left: 70px;"><div class="enemy-tag">ENEMY [68m]</div></div>
+                </div>
+            </div>
+
+            <!-- HITBOX PHANTOM EXACT STYLING -->
+            <div class="feature-card">
+                <div class="feature-header">
+                    <span class="feature-title">02 จุดเล็งอัจฉริยะ <span class="edition-badge">ใหม่</span></span>
+                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                </div>
+                <div style="font-size: 0.68rem; color: var(--text-muted); margin-bottom: 6px;">ย้ายจุดเล็งจากหน้าอกขึ้นไปทางหัว เลื่อนเพื่อเลือกระดับ[span_0](start_span)[span_0](end_span)</div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6px;">
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">ความสูงจุดเล็ง</span>
+                    <div class="hitbox-big-percent-exact" id="val-big">100%</div>
+                </div>
+
+                <div class="hitbox-exact-wrapper">
+                    <!-- หุ่นตัวละคร SVG โค้งมนทรงขวดต้นฉบับ[span_1](start_span)[span_1](end_span) -->
+                    <div class="char-silhouette-box">
+                        <svg class="phantom-svg-body" viewBox="0 0 100 200" preserveAspectRatio="none">
+                            <path d="M 50 10 C 36 10, 32 30, 32 42 C 32 51, 38 56, 38 63 C 20 70, 12 88, 12 116 L 88 116 C 88 88, 80 70, 62 63 C 62 56, 68 51, 68 42 C 68 30, 64 10, 50 10 Z" fill="#181818" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+                        </svg>
+                        
+                        <!-- กรอบเป้าลายทางวิ่งตามพิกัดนิ้วลากจริง[span_2](start_span)[span_2](end_span) -->
+                        <div class="phantom-target-box" id="target-box"></div>
+                    </div>
+
+                    <!-- สไลเดอร์แนวตั้งระบบสัมผัสลื่นไหล ไม่ค้าง[span_3](start_span)[span_3](end_span) -->
+                    <div class="slider-center-exact">
+                        <div class="touch-track-area" id="touch-track">
+                            <div class="touch-track-line">
+                                <div class="touch-track-fill" id="track-fill"></div>
+                                <div class="touch-thumb-knob" id="track-thumb"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- รายชื่อระดับขวาตรงตามรูปต้นฉบับ[span_4](start_span)[span_4](end_span) -->
+                    <div class="hitbox-labels-side">
+                        <div id="lbl-head" class="active"><span>หัว</span> <span id="r-head">100%</span></div>
+                        <div id="lbl-neck"><span>คอ</span> <span id="r-neck">68%</span></div>
+                        <div id="lbl-shoulder"><span>ไหล่</span> <span id="r-shoulder">58%</span></div>
+                        <div id="lbl-chest"><span>อกบน</span> <span id="r-chest">30%</span></div>
+                        <div id="lbl-body"><span>หน้าอก</span> <span id="r-body">0%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="pane-features" class="view-pane">
+            <div class="feature-card">
+                <div class="feature-header">
+                    <span class="feature-title">⚡ เปิดเกม Free Fire</span>
+                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                </div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 10px;">เชื่อมต่อท่อตรง ปิงนิ่ง ไม่กระตุก:</div>
+                <button class="btn-custom" onclick="launchGameProcess()">🎮 เปิดเข้าเกม Free Fire</button>
+            </div>
+        </div>
+
+        <div id="pane-manage" class="view-pane">
+            <div class="feature-card">
+                <div class="feature-header"><span class="feature-title">⚙️ ตั้งค่าระบบ</span></div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.5;">
+                    • สถานะ: <span style="color:#00ff88">Secure Bypass Active</span><br>
+                    • ระบบคลิปบอร์ด: ใช้กล่องข้อความปลอดภัย 100%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('home', this)">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            หน้าหลัก
+        </button>
+        <button class="nav-item" onclick="switchTab('features', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            ฟีเจอร์
+        </button>
+        <button class="nav-item" onclick="switchTab('manage', this)">
+            <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.03 2.18 13.82 2 13.6 2h-4c-.22 0-.42.18-.45.39l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.22.23.39.45.39h4c.22 0 .42-.18.45-.39l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+            จัดการ
+        </button>
+    </nav>
+
+    <script>
+        function updateSubLink() {
+            const keyInput = document.getElementById('user-key-input');
+            const currentKey = keyInput ? keyInput.value.trim() : "pldk-9ef1-fdbd";
+            const subLinkBox = document.getElementById('sub-link-textarea');
+            if(subLinkBox) {
+                subLinkBox.value = `vless://phantom-secure-${currentKey}@127.0.0.1:443?encryption=none&security=none&type=tcp#PHANTOM_STORE`;
+            }
+        }
+
+        function openHappApp() {
+            window.location.href = "intent://#Intent;package=com.v2ray.tun;end;";
+        }
+
+        let currentPercent = 100;
+
+        function applyHitboxPercent(percent) {
+            currentPercent = Math.max(0, Math.min(100, Math.round(percent)));
+            
+            const valBig = document.getElementById('val-big');
+            const rHead = document.getElementById('r-head');
+            const targetBox = document.getElementById('target-box');
+            const trackFill = document.getElementById('track-fill');
+            const trackThumb = document.getElementById('track-thumb');
+
+            if(valBig) valBig.innerText = currentPercent + '%';
+            if(rHead) rHead.innerText = currentPercent + '%';
+            
+            if(targetBox) {
+                let topPos = 12 + ((100 - currentPercent) * 0.98);
+                targetBox.style.top = to
